@@ -223,7 +223,6 @@ function startExtension() {
         checkDashboardReady();
         loadCustomFont();
         applyAestheticChanges();
-        changeFavicon();
         updateReminders();
         //getClassAverages();
         setTimeout(() => runDarkModeFixer(false), 800);
@@ -263,9 +262,6 @@ function applyOptionsChanges(changes) {
             case ("gradient_cards"):
                 changeGradientCards();
                 break;
-            case ("dashboard_notes"):
-                loadDashboardNotes();
-                break;
             case ("dashboard_grades"):
             case ("grade_hover"):
                 if (!grades) getGrades();
@@ -291,23 +287,12 @@ function applyOptionsChanges(changes) {
                 break;
             case ("todo_hr24"):
             case ("num_todo_items"):
-            case ("hover_preview"):
             case ("todo_overdues"):
             case ("todo_colors"):
             case ("custom_cards_3"):
                 moreAnnouncementCount = 0;
                 moreAssignmentCount = 0;
                 loadBetterTodo();
-                break;
-            case ("gpa_calc"):
-            case ("gpa_calc_prepend"):
-            case ("gpa_calc_weighted"):
-            case ("gpa_calc_cumulative"):
-                if (!grades) getGrades();
-                setupGPACalc();
-                break;
-            case ("gpa_calc_bounds"):
-                calculateGPA2();
                 break;
             case ("custom_font"):
                 loadCustomFont();
@@ -355,8 +340,6 @@ function checkDashboardReady() {
                     loadCardAssignments();
                     customizeCards(cards);
                     insertGrades();
-                    loadDashboardNotes();
-                    setupGPACalc();
                     showUpdateMsg();
                 } else if (mutation.target == document.querySelector('#right-side')) {
                     if (!mutation.target.querySelector(".bettercanvas-todosidebar")) {
@@ -849,7 +832,7 @@ function loadBetterTodo() {
 
                     let listItemContainer = document.createElement("div");
                     listItemContainer.classList.add("bettercanvas-todo-container");
-                    listItemContainer.innerHTML = '<div class="bettercanvas-hover-preview"><p class="bettercanvas-preview-title"></p><p class="bettercanvas-preview-text"></p></div><div class="bettercanvas-todo-actions"></div><div class="bettercanvas-todo-icon"></div><a class="bettercanvas-todo-item"><div class="bettercanvas-todo-item-header"></div></a><button class="bettercanvas-todo-actions-btn"><i class="icon-more bettercanvas-dots-icon" aria-hidden="true"></i></button>';
+                    listItemContainer.innerHTML = '<div class="bettercanvas-todo-actions"></div><div class="bettercanvas-todo-icon"></div><a class="bettercanvas-todo-item"><div class="bettercanvas-todo-item-header"></div></a><button class="bettercanvas-todo-actions-btn"><i class="icon-more bettercanvas-dots-icon" aria-hidden="true"></i></button>';
                     listItemContainer.querySelector(".bettercanvas-todo-item").href = item.html_url;
                     listItemContainer.dataset.id = item.plannable_id;
                     listItemContainer.querySelector('.bettercanvas-todo-icon').innerHTML += svg;
@@ -868,61 +851,6 @@ function loadBetterTodo() {
                     let todoDate = makeElement("p", listItem, { "className": "bettercanvas-todoitem-date", "textContent": format.date });
                     if (format.dueSoon) todoDate.classList.add("bettercanvas-due-soon");
 
-                    if (options.hover_preview === true) {
-                        const customItem = item.planner_override && item.planner_override.custom && item.planner_override.custom === true;
-                        listItem.addEventListener("mouseover", () => {
-                            listItem.classList.add("bettercanvas-todo-hover");
-                            let preview = listItemContainer.querySelector(".bettercanvas-hover-preview");
-                            let previewTitle = preview.querySelector(".bettercanvas-preview-title");
-                            let previewText = preview.querySelector(".bettercanvas-preview-text");
-                            clearTimeout(delay);
-                            delay = setTimeout(async () => {
-                                if (listItem.classList.contains("bettercanvas-todo-hover")) {
-                                    previewTitle.textContent = item.plannable.title;
-                                    // custom assignment
-                                    if (customItem) {
-                                        previewText.textContent = "Custom assignment";
-                                    } else {
-                                        console.log(item);
-                                        let found = false;
-                                        let searchCount = 1;
-                                        while (searchCount < 5 && found === false) {
-                                            for (let i = 0; i < announcements.length; i++) {
-                                                if (announcements[i].id === item.plannable_id) {
-                                                    found = true;
-                                                    if (previewText.textContent === "") {
-                                                        let description = item.plannable_type === "announcement" ? announcements[i].message : announcements[i].description;
-                                                        previewText.textContent = description === "" ? "No details given" : description.replace(/<\/?[^>]+(>|$)/g, " ");
-                                                    }
-                                                    break;
-                                                }
-                                            }
-                                            if (found === false) {
-                                                let apiLink = domain + "/api/v1/";
-                                                if (item.plannable_type === "assignment") {
-                                                    apiLink += `courses/${item.course_id}/assignments/${item.plannable_id}`;
-                                                } else if (item.plannable_type === "announcement") {
-                                                    apiLink += `announcements?context_codes[]=course_${item.course_id}&per_page=3&page=${searchCount}`;
-                                                }
-                                                let data = await getData(apiLink);
-                                                item.plannable_type === "announcement" ? announcements.push(...data) : announcements.push(data);
-                                                searchCount++;
-                                            }
-                                        }
-                                        if (found === false) {
-                                            previewText.textContent = "Couldn't load preview";
-                                        }
-                                    }
-                                    preview.style.display = "block";
-                                }
-                            }, 250);
-                        });
-
-                        listItem.addEventListener("mouseleave", () => {
-                            listItem.classList.remove("bettercanvas-todo-hover");
-                            listItemContainer.querySelector(".bettercanvas-hover-preview").style.display = "none";
-                        });
-                    }
 
                     const actions = listItemContainer.querySelector(".bettercanvas-todo-actions");
 
@@ -1632,251 +1560,13 @@ function getCustomLinkImage(path) {
     }
 }
 
-/*
-GPA calculator
-*/
-
-function calculateGPA2() {
-    let qualityPoints = 0, numCredits = 0, weightedQualityPoints = 0, cumulativePoints = 0, cumulativeCredits = 0;
-    document.querySelectorAll('.bettercanvas-gpa-course').forEach(course => {
-        const weight = course.querySelector('.bettercanvas-course-weight').value;
-        const credits = parseFloat(course.querySelector('.bettercanvas-course-credit').value);
-        const grade = parseFloat(course.querySelector('.bettercanvas-course-percent').value);
-        if (weight === "dnc" || !credits || !grade) return;
-        let letter = "--";
-        let gpa;
-        if (grade >= options.gpa_calc_bounds["A+"].cutoff) {
-            gpa = options.gpa_calc_bounds["A+"].gpa;
-            letter = "A+";
-        } else if (grade >= options.gpa_calc_bounds["A"].cutoff) {
-            gpa = options.gpa_calc_bounds["A"].gpa;
-            letter = "A";
-        } else if (grade >= options.gpa_calc_bounds["A-"].cutoff) {
-            gpa = options.gpa_calc_bounds["A-"].gpa;
-            letter = "A-";
-        } else if (grade >= options.gpa_calc_bounds["B+"].cutoff) {
-            gpa = options.gpa_calc_bounds["B+"].gpa;
-            letter = "B+";
-        } else if (grade >= options.gpa_calc_bounds["B"].cutoff) {
-            gpa = options.gpa_calc_bounds["B"].gpa;
-            letter = "B";
-        } else if (grade >= options.gpa_calc_bounds["B-"].cutoff) {
-            gpa = options.gpa_calc_bounds["B-"].gpa;
-            letter = "B-"
-        } else if (grade >= options.gpa_calc_bounds["C+"].cutoff) {
-            gpa = options.gpa_calc_bounds["C+"].gpa;
-            letter = "C+";
-        } else if (grade >= options.gpa_calc_bounds["C"].cutoff) {
-            gpa = options.gpa_calc_bounds["C"].gpa;
-            letter = "C";
-        } else if (grade >= options.gpa_calc_bounds["C-"].cutoff) {
-            gpa = options.gpa_calc_bounds["C-"].gpa;
-            letter = "C-";
-        } else if (grade >= options.gpa_calc_bounds["D+"].cutoff) {
-            gpa = options.gpa_calc_bounds["D+"].gpa;
-            letter = "D+";
-        } else if (grade >= options.gpa_calc_bounds["D"].cutoff) {
-            gpa = options.gpa_calc_bounds["D"].gpa;
-            letter = "D";
-        } else if (grade >= options.gpa_calc_bounds["D-"].cutoff) {
-            gpa = options.gpa_calc_bounds["D-"].gpa;
-            letter = "D-";
-        } else {
-            letter = "F";
-            gpa = options.gpa_calc_bounds["F"].gpa;
-        }
-        /*
-        if (course.id === "cumulative-gpa") {
-            //gpa = parseFloat(options["cumulative_gpa"]["gr"]);
-            gpa = 0;
-            cumulativePoints += parseFloat(options["cumulative_gpa"]["gr"]) * credits;
-            cumulativeCredits = credits;
-        } else {
-            */
-            course.querySelector(".bettercanvas-gpa-letter-grade").textContent = letter;
-
-            let weightMultiplier = 0;
-            if (weight === "ap") {
-                weightMultiplier = 1;
-            } else if (weight === "honors") {
-                weightMultiplier = .5;
-            }
-            
-            qualityPoints += gpa * credits;
-            weightedQualityPoints += (gpa + weightMultiplier) * credits;
-            numCredits += credits;
-        //}
 
 
 
-    });
-    document.querySelector("#bettercanvas-gpa-unweighted").textContent = (qualityPoints / numCredits).toFixed(2);
-    document.querySelector("#bettercanvas-gpa-weighted").textContent = (weightedQualityPoints / numCredits).toFixed(2);
-    const cGPA = document.querySelector("#bettercanvas-cumulative-gpa");
-    const g = parseFloat(cGPA.querySelector(".bettercanvas-course-percent").value);
-    const c = parseInt(cGPA.querySelector(".bettercanvas-course-credit").value);
-    document.querySelector("#bettercanvas-gpa-cumulative").textContent = (((options.gpa_calc_weighted === true ? weightedQualityPoints : qualityPoints) + (g * c)) / (numCredits + c)).toFixed(2);
-}
 
-function changeGPASettings(course_id, update) {
-    calculateGPA2();
-    chrome.storage.sync.get(["custom_cards", "cumulative_gpa"], storage => {
-        if (course_id === "cumulative") {
-            chrome.storage.sync.set({ "cumulative_gpa": { ...storage["cumulative_gpa"], ...update } });
-        } else {
-            chrome.storage.sync.set({ "custom_cards": { ...storage["custom_cards"], [course_id]: { ...storage["custom_cards"][course_id], ...update } } });
-        }
-    });
-}
 
-function createGPACalcCourse(location, course) {
 
-    let customs;
-    if (course.access_restricted_by_date === true) {
-        return null;
-    } if (course.id === "cumulative") {
-        customs = options["cumulative_gpa"];
-    } else if (options.custom_cards && options.custom_cards[course.id]) {
-        customs = options.custom_cards[course.id];
-    } else {
-        return;
-        customs = { "name": course.name, "hidden": false, "weight": "regular", "credits": 1, "gr": null };
-    }
-    if (customs.hidden === true) return;
 
-    let courseContainer = makeElement("div", location, { "className": course.id === "cumulative" ? "bettercanvas-gpa-cumulative" : "bettercanvas-gpa-course", "innerHTML": '<div class="bettercanvas-gpa-letter-grade"></div>' });
-    let courseName = makeElement("p", courseContainer, { "className": "bettercanvas-gpa-name", "textContent": customs.name === "" ? course.course_code : customs.name });
-    let changerContainer = makeElement("div", courseContainer, { "className": "bettercanvas-gpa-percent-container" });
-
-    let credits = makeElement("div", courseContainer, { "className": "bettercanvas-course-credits", "innerHTML": '<input class="bettercanvas-course-credit" value="1"></input><span class="bettercanvas-course-percent-sign">cr</span>' });
-    let creditsChanger = credits.querySelector(".bettercanvas-course-credit");
-    creditsChanger.value = customs.credits;
-    let changer = makeElement("input", changerContainer, { "className": "bettercanvas-course-percent" });
-    let percent = makeElement("span", changerContainer, { "className": "bettercanvas-course-percent-sign", "textContent": course.id === "cumulative" ? "/4" : "%" });
-    let courseGrade = course?.enrollments[0].has_grading_periods === true ? course.enrollments[0].current_period_computed_current_score : course.enrollments[0].computed_current_score;
-
-    if (customs["gr"] !== null) {
-        changer.value = customs["gr"];
-    } else if (courseGrade) {
-        changer.value = courseGrade;
-    } else {
-        changer.value = "--";
-    }
-
-    if (course.id !== "cumulative") {
-        let weightSelections = makeElement("form", courseContainer, { "className": "bettercanvas-course-weights" });
-        weightSelections.innerHTML = '<select name="weight-selection" class="bettercanvas-course-weight"><option value="dnc">Do not count</option><option value="regular">Regular/College</option><option value="honors">Honors</option><option value="ap">AP/IB</option></select>';
-        let weightChanger = weightSelections.querySelector(".bettercanvas-course-weight");
-        weightChanger.value = changer.value === "--" ? "dnc" : customs.weight;   
-        weightChanger.addEventListener('change', () => changeGPASettings(course.id, { "weight": weightSelections.querySelector(".bettercanvas-course-weight").value }));
-
-        let useCustomGr = makeElement("input", courseContainer, { "className": "bettercanvas-course-customgr", "type": "checkbox", "checked": customs.gr !== null ? true : false });
-        let useCustomGrLabel = makeElement("span", courseContainer, { "className": "bettercanvas-course-customgr-label", "textContent": "Save custom grade" });
-        useCustomGr.addEventListener("input", () => {
-            if (options["custom_cards"][course.id]) {
-                if (options["custom_cards"][course.id]["gr"] !== undefined && options["custom_cards"][course.id]["gr"] !== null) {
-                    changer.value = courseGrade;
-                    changeGPASettings(course.id, { "gr": null });
-                } else {
-                    changeGPASettings(course.id, { "gr": changer.value });
-                }
-            }
-        });
-    }   
-
-    changer.addEventListener('input', (e) => {
-        if (course.id === "cumulative" || (options["custom_cards"][course.id]["gr"] !== undefined && options["custom_cards"][course.id]["gr"] !== null)) {
-            changeGPASettings(course.id, { "gr": e.target.value });
-        } else {
-            calculateGPA2();
-        }
-    });
-
-    credits.querySelector(".bettercanvas-course-credit").addEventListener('input', () => changeGPASettings(course.id, { "credits": credits.querySelector(".bettercanvas-course-credit").value }));
-    return courseContainer;
-}
-
-function setupGPACalc() {
-    if (current_page !== "/" && current_page !== "") return;
-    try {
-        grades?.then(result => {
-
-            if (!document.querySelector(".ic-DashboardCard__box__container")) return;
-
-            let container2 = document.querySelector(".bettercanvas-gpa-card") || document.createElement("div");
-            container2.className = "bettercanvas-gpa-card";
-            container2.style.display = options.gpa_calc === true ? "inline-block" : "none";
-
-            container2.innerHTML = `<h3 class="bettercanvas-gpa-header">GPA</h3><div><div><p id="bettercanvas-gpa-unweighted"></p><p>Current</p></div><div style="display:${options["gpa_calc_weighted"] ? "block" : "none"}"><p id="bettercanvas-gpa-weighted"></p><p>Weighted</p></div><div style="display:${options["gpa_calc_cumulative"] ? "block" : "none"}"><p id="bettercanvas-gpa-cumulative"></p><p>Cumulative</p></div></div>`;
-            let editBtn = makeElement("button", container2, { "className": "bettercanvas-gpa-edit-btn", "textContent": "Edit Calculator" });
-
-            let container = document.querySelector(".bettercanvas-gpa") || document.createElement("div");
-            container.className = "bettercanvas-gpa";
-            container.innerHTML = '<h3 class="bettercanvas-gpa-header">GPA Calculator</h3><div class="bettercanvas-gpa-courses-container"><div class="bettercanvas-gpa-courses"></div></div>';
-
-            if (options.gpa_calc_prepend === true) {
-                document.querySelector(".ic-DashboardCard__box__container").prepend(container2);
-                document.querySelector(".ic-DashboardCard__box__container").prepend(container);
-            } else {
-                document.querySelector(".ic-DashboardCard__box__container").appendChild(container2);
-                document.querySelector(".ic-DashboardCard__box__container").appendChild(container);
-            }
-
-            let location = document.querySelector(".bettercanvas-gpa-courses");
-            let cumulative = createGPACalcCourse(location, { "id": "cumulative", "enrollments": [{ "has_grading_periods": true, "current_period_computed_current_score": 0 }] });
-            cumulative.id = "bettercanvas-cumulative-gpa";
-            result.forEach(course => createGPACalcCourse(location, course));
-
-            container.style.display = "none";
-
-            editBtn.addEventListener("click", () => {
-                if (container.style.display === "none") {
-                    container.style.display = "inline-block";
-                    editBtn.textContent = "Close Calculator";
-                } else {
-                    container.style.display = "none";
-                    editBtn.textContent = "Edit Calculator";
-                }
-            });
-
-            calculateGPA2();
-        });
-    } catch (e) {
-        logError(e);
-    }
-}
-
-/*
-Dashboard notes
-*/
-
-let dashboardNotesTimer;
-function delayDashboardNotesStorage(text) {
-    clearTimeout(dashboardNotesTimer);
-    dashboardNotesTimer = setTimeout(() => {
-        chrome.storage.sync.set({ dashboard_notes_text: text });
-    }, 1000);
-}
-
-function loadDashboardNotes() {
-    if (options.dashboard_notes === true) {
-        let notes = document.querySelector('.bettercanvas-dashboard-notes') || document.createElement("textarea");
-        notes.classList.add("bettercanvas-dashboard-notes");
-        notes.value = options.dashboard_notes_text;
-        notes.placeholder = "Enter notes here";
-        notes.style.display = "block";
-        if (notes.parentElement === null) document.querySelector("#DashboardCard_Container").prepend(notes);
-        notes.style.height = notes.scrollHeight + 5 + "px";
-        notes.addEventListener('input', function () {
-            delayDashboardNotesStorage(this.value);
-            this.style.height = "1px";
-            this.style.height = this.scrollHeight + 5 + "px";
-        });
-    } else {
-        let notes = document.querySelector('.bettercanvas-dashboard-notes');
-        if (notes) notes.style.display = "none";
-    }
-}
 
 /*
 Custom font
@@ -2055,13 +1745,13 @@ function setupCustomURL() {
 }
 
 function getGrades() {
-    if (options.gpa_calc === true || options.dashboard_grades === true) {
+    if (options.dashboard_grades === true) {
         grades = getData(`${domain}/api/v1/courses?${/*enrollment_state=active&*/""}include[]=concluded&include[]=total_scores&include[]=computed_current_score&include[]=current_grading_period_scores&per_page=100`);
     }
 }
 
 function getColors() {
-    if (options.tab_icons || options.todo_colors) {
+    if (options.todo_colors) {
         let colors = getData(`${domain}/api/v1/users/self/colors`);
         colors.then(data => {
             let cards = options.custom_cards_3;
@@ -2073,13 +1763,6 @@ function getColors() {
     }
 }
 
-function changeFavicon() {
-    if (options.tab_icons !== true) return;
-    let match = current_page.match(/courses\/(?<id>\d*)/);
-    if (match && match.groups.id && options.custom_cards_3[match.groups.id]?.color) {
-        document.querySelector('link[rel="icon"').href = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="white" width="128px" height="128px" viewBox="-192 -192 2304.00 2304.00" stroke="white"><g stroke-width="0"><rect x="-192" y="-192" width="2304.00" height="2304.00" rx="0" fill="${options.custom_cards_3[match.groups.id].color.replace("#", "%23")}" strokewidth="0"/></g><g stroke-linecap="round" stroke-linejoin="round"/><g> <path d="M958.568 277.97C1100.42 277.97 1216.48 171.94 1233.67 34.3881 1146.27 12.8955 1054.57 0 958.568 0 864.001 0 770.867 12.8955 683.464 34.3881 700.658 171.94 816.718 277.97 958.568 277.97ZM35.8207 682.031C173.373 699.225 279.403 815.285 279.403 957.136 279.403 1098.99 173.373 1215.05 35.8207 1232.24 12.8953 1144.84 1.43262 1051.7 1.43262 957.136 1.43262 862.569 12.8953 769.434 35.8207 682.031ZM528.713 957.142C528.713 1005.41 489.581 1044.55 441.31 1044.55 393.038 1044.55 353.907 1005.41 353.907 957.142 353.907 908.871 393.038 869.74 441.31 869.74 489.581 869.74 528.713 908.871 528.713 957.142ZM1642.03 957.136C1642.03 1098.99 1748.06 1215.05 1885.61 1232.24 1908.54 1144.84 1920 1051.7 1920 957.136 1920 862.569 1908.54 769.434 1885.61 682.031 1748.06 699.225 1642.03 815.285 1642.03 957.136ZM1567.51 957.142C1567.51 1005.41 1528.38 1044.55 1480.11 1044.55 1431.84 1044.55 1392.71 1005.41 1392.71 957.142 1392.71 908.871 1431.84 869.74 1480.11 869.74 1528.38 869.74 1567.51 908.871 1567.51 957.142ZM958.568 1640.6C816.718 1640.6 700.658 1746.63 683.464 1884.18 770.867 1907.11 864.001 1918.57 958.568 1918.57 1053.14 1918.57 1146.27 1907.11 1233.67 1884.18 1216.48 1746.63 1100.42 1640.6 958.568 1640.6ZM1045.98 1480.11C1045.98 1528.38 1006.85 1567.51 958.575 1567.51 910.304 1567.51 871.172 1528.38 871.172 1480.11 871.172 1431.84 910.304 1392.71 958.575 1392.71 1006.85 1392.71 1045.98 1431.84 1045.98 1480.11ZM1045.98 439.877C1045.98 488.148 1006.85 527.28 958.575 527.28 910.304 527.28 871.172 488.148 871.172 439.877 871.172 391.606 910.304 352.474 958.575 352.474 1006.85 352.474 1045.98 391.606 1045.98 439.877ZM1441.44 1439.99C1341.15 1540.29 1333.98 1697.91 1418.52 1806.8 1579 1712.23 1713.68 1577.55 1806.82 1418.5 1699.35 1332.53 1541.74 1339.7 1441.44 1439.99ZM1414.21 1325.37C1414.21 1373.64 1375.08 1412.77 1326.8 1412.77 1278.53 1412.77 1239.4 1373.64 1239.4 1325.37 1239.4 1277.1 1278.53 1237.97 1326.8 1237.97 1375.08 1237.97 1414.21 1277.1 1414.21 1325.37ZM478.577 477.145C578.875 376.846 586.039 219.234 501.502 110.339 341.024 204.906 206.338 339.592 113.203 498.637 220.666 584.607 378.278 576.01 478.577 477.145ZM679.155 590.32C679.155 638.591 640.024 677.723 591.752 677.723 543.481 677.723 504.349 638.591 504.349 590.32 504.349 542.048 543.481 502.917 591.752 502.917 640.024 502.917 679.155 542.048 679.155 590.32ZM1440 475.712C1540.3 576.01 1697.91 583.174 1806.8 498.637 1712.24 338.159 1577.55 203.473 1418.51 110.339 1332.54 217.801 1341.13 375.413 1440 475.712ZM1414.21 590.32C1414.21 638.591 1375.08 677.723 1326.8 677.723 1278.53 677.723 1239.4 638.591 1239.4 590.32 1239.4 542.048 1278.53 502.917 1326.8 502.917 1375.08 502.917 1414.21 542.048 1414.21 590.32ZM477.145 1438.58C376.846 1338.28 219.234 1331.12 110.339 1415.65 204.906 1576.13 339.593 1710.82 498.637 1805.39 584.607 1696.49 577.443 1538.88 477.145 1438.58ZM679.155 1325.37C679.155 1373.64 640.024 1412.77 591.752 1412.77 543.481 1412.77 504.349 1373.64 504.349 1325.37 504.349 1277.1 543.481 1237.97 591.752 1237.97 640.024 1237.97 679.155 1277.1 679.155 1325.37Z"/></g></svg>`;
-    }
-}
 
 
 function getAssignments() {

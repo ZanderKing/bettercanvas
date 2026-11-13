@@ -46,10 +46,6 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 7v-2h13v2"></path><path d="M10 5v14"></path><path d="M12 19h-4"></path><path d="M15 13v-1h6v1"></path><path d="M18 12v7"></path><path d="M17 19h2"></path></svg>
                     <span data-i18n="custom_font">Custom Font</span>
                 </button>
-                <button id="gpa-bounds-btn" class="big-button tab-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M22 9l-10 -4l-10 4l10 4l10 -4v6"></path><path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4"></path></svg>
-                    <span data-i18n="gpa_settings">GPA Settings</span>
-                </button>
                 <button id="report-issue-btn" class="big-button tab-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M12 9v4"></path><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"></path><path d="M12 16h.01"></path></svg>
                     <span data-i18n="report_issue">Report issue</span>
@@ -128,31 +124,6 @@
                     </div>
                 </div>
                 <div class="option-container">
-                    <div class="option" id="gpa_calc">
-                        <input type="radio" id="off" name="gpa_calc">
-                        <input type="radio" id="on" name="gpa_calc">
-                        <div class="slider">
-                            <div class="sliderknob"></div>
-                            <div class="sliderbg"></div>
-                        </div>
-                        <span class="option-name" data-i18n="gpa_calculator">GPA calculator</span>
-                    </div>
-                    <div class="sub-options">
-                        <div class="sub-option" style="margin-top:5px">
-                            <input type="checkbox" id="gpa_calc_prepend" name="gpa_calc_prepend">
-                            <label for="gpa_calc_prepend" class="sub-text" data-i18n="move_top">Move to top</label>
-                        </div>
-                        <div class="sub-option" style="margin-top:5px">
-                            <input type="checkbox" id="gpa_calc_cumulative" name="gpa_calc_cumulative">
-                            <label for="gpa_calc_cumulative" class="sub-text" data-i18n="gpa_calc_cumulative">Show cumulative GPA</label>
-                        </div>
-                        <div class="sub-option" style="margin-top:5px">
-                            <input type="checkbox" id="gpa_calc_weighted" name="gpa_calc_weighted">
-                            <label for="gpa_calc_weighted" class="sub-text" data-i18n="gpa_calc_weighted">Show weighted GPA</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="option-container">
                     <div class="option" id="dashboard_grades">
                         <input type="radio" id="off" name="dashboard_grades">
                         <input type="radio" id="on" name="dashboard_grades">
@@ -203,11 +174,6 @@
                     </div>
                     <div class="sub-options">
                         <div class="sub-option">
-                            <input type="checkbox" id="hover_preview" name="hover_preview">
-                            <label for="hover_preview" class="sub-text" data-i18n="hover_preview">Hover to preview
-                                details</label>
-                        </div>
-                        <div class="sub-option">
                             <input type="checkbox" id="hide_completed" name="hide_completed">
                             <label for="hide_completed" class="sub-text" data-i18n="hide_completed">Hide
                                 completed</label>
@@ -232,14 +198,6 @@
                     </div>
                 </div>
                 <div class="option-container" style="display:flex;flex-direction:column;gap:6px;">
-                    <div class="option" id="dashboard_notes">
-                        <input type="radio" id="off" name="dashboard_notes">
-                        <input type="radio" id="on" name="dashboard_notes">
-                        <div class="slider">
-                            <div class="sliderknob"></div>
-                            <div class="sliderbg"></div>
-                        </div><span class="option-name" data-i18n="dashboard_notes">Dashboard Notes</span>
-                    </div>
                     <div class="option" id="gradient_cards">
                         <input type="radio" id="off" name="gradient_cards">
                         <input type="radio" id="on" name="gradient_cards">
@@ -290,14 +248,6 @@
                             <div class="sliderbg"></div>
                         </div><span class="option-name" data-i18n="hide_feedback">Hide recent feedback</span>
                     </div>
-                    <div class="option" id="tab_icons">
-                        <input type="radio" id="off" name="tab_icons">
-                        <input type="radio" id="on" name="tab_icons">
-                        <div class="slider">
-                            <div class="sliderknob"></div>
-                            <div class="sliderbg"></div>
-                        </div><span class="option-name" data-i18n="tab_icons">Color coded tab icons</span>
-                    </div>
                 </div>
                 <div class="option-container">
                     <div class="customDomain">
@@ -311,90 +261,14 @@
     </div>
 
     <div class="import-export tab" style="display: none">
-        <div id="submit-popup">
-            <div style="max-width: 75%;color:#a7a7a7">
-                <h3 class="header-small" style="font-size:18px;color:#fff">Submission confirmation</h3>
-                <p style="font-size:14px;margin-top: 10px;font-weight:600;">This is <span style="text-decoration: underline;">not</span> for requesting a theme. I don't create themes by request.</p>
-                <p style="margin-top: 10px;">Your submission will include your current thematic settings, such as your card images, dark mode, and font.</p>
-                <p style="margin-top: 10px;">Make sure your theme follows these guidelines:</p>
-                <ul>
-                    <li>Appropriate images/title</li>
-                    <li>Does not heavily use components from other themes</li>
-                    <li>Uses a unique custom dark mode (not one of the presets)</li>
-                    <li>Custom images cannot be from Discord or Gmail. These images are not public</li>
-                </ul>
-                <div style="display: flex; gap: 5px;margin-top:14px;">
-                    <button id="submit-theme-btn" class="big-button" style="width: 50%;">Submit</button>
-                    <button id="cancel-theme-btn" class="big-button" style="width: 50%;">Cancel</button>
-                </div>
-            </div>
-        </div>
-        <div id="browser-settings-popup">
-            <div style="width: 50%;">
-                <h3 class="header-small" style="margin-bottom:14px;font-size:18px;">Theme browser settings</h3>
-                <div style="display:flex;gap:8px;align-items: center;color:#a7a7a7">
-                    <input type="checkbox" id="browser_show_likes">
-                    <span>Always show like count</span>
-                </div>
-                <button id="close-settings-btn" class="big-button" style="width: 50%;margin-top:14px;">Close</button>
-            </div>
-        </div>
         <div class="tab-header">
             <h2 style="margin-top: 0" data-i18n="themes">Themes</h2>
             <button class="big-button back-btn" data-i18n="back">Back</button>
         </div>
         <div class="option-container">
-            <div class="theme-header small-option">
-                <h3 class="header-small" style="margin:0">Submit your theme</h3>
-                <div class="big-button" id="show-submit-form">Show</div>
-            </div>
-            <p style="color:#a7a7a7">Do you want to submit your theme for others to use?</p>
-
-            <div id="submit-drawer" style="display: none;">
-                <div>
-                    <div id="submit-tab">
-                        <button class="submit-tab-btn active" id="submit-form-btn">Submit</button>
-                        <button class="submit-tab-btn" id="view-submissions-btn">My submissions</button>
-                    </div>
-                </div>
-                <div id="submit-form" style="margin-top:10px;">
-                    <div style="display: flex;gap:40px;">
-                        <div>
-                            <div>
-                                <p style="font-weight:600;">Title</p>
-                                <input type="text" class="card-input" id="submit-title">
-                                <p style="color:#a7a7a7;font-size:12px;margin-top:4px;">Try to keep this short and relevant so people can search for it.</p>
-                            </div>
-                            <div style="margin-top:14px;">
-                                <p style="font-weight:600;">Created by</p>
-                                <input type="text" class="card-input" id="submit-credits">
-                                <p style="color:#a7a7a7;font-size:12px;margin-top:4px;">This can be anything including your name, social media handle, anonymous etc.</p>
-                            </div>
-                                            </div>
-                        <div style="min-width: 25%;">
-                            <p style="color:#a7a7a7;font-size:12px;margin-bottom:5px;">Preview</p>
-                            <button id="theme-button-img" class="theme-button customization-button"
-                            style="width: 100%;background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6));">
-                                <p class="theme-button-title" id="theme-button-title-preview">Title</p>
-                                <p class="theme-button-creator" id="theme-button-creator-preview">Credits</p>
-                            </button>
-                        </div>
-                    </div>
-                    <div style="display: flex;gap:6px;margin-top: 10px;">
-                        <button id="submit-theme-btn-1" class="big-button">Submit</button>
-                    </div>
-                </div>
-                <div id="view-submissions" style="display: none;">
-                    <div id="latest-submissions"></div>
-                    <p style="font-size:12px;color:#a4a4a4;margin:6px 0">Showing your latest 3 submissions</p>
-                </div>
-            </div>
-        </div>
-        <div class="option-container">
             <div class="theme-header">
                 <div style="display:flex;gap:6px;align-items:center">
                     <h3 class="header-small" style="margin:0">User made themes</h3>
-                    <svg id="browser-settings-btn" xmlns="http://www.w3.org/2000/svg"  width="16"  height="16"  viewBox="0 0 24 24"  fill="currentColor"  class="icon icon-tabler icons-tabler-filled icon-tabler-settings"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14.647 4.081a.724 .724 0 0 0 1.08 .448c2.439 -1.485 5.23 1.305 3.745 3.744a.724 .724 0 0 0 .447 1.08c2.775 .673 2.775 4.62 0 5.294a.724 .724 0 0 0 -.448 1.08c1.485 2.439 -1.305 5.23 -3.744 3.745a.724 .724 0 0 0 -1.08 .447c-.673 2.775 -4.62 2.775 -5.294 0a.724 .724 0 0 0 -1.08 -.448c-2.439 1.485 -5.23 -1.305 -3.745 -3.744a.724 .724 0 0 0 -.447 -1.08c-2.775 -.673 -2.775 -4.62 0 -5.294a.724 .724 0 0 0 .448 -1.08c-1.485 -2.439 1.305 -5.23 3.744 -3.745a.722 .722 0 0 0 1.08 -.447c.673 -2.775 4.62 -2.775 5.294 0zm-2.647 4.919a3 3 0 1 0 0 6a3 3 0 0 0 0 -6z" /></svg>
                 </div>
                 <span id="premade-themes-pagenum"></span>
             </div>
@@ -408,8 +282,6 @@
                     </button>
                     <div id="theme-sort-selector">
                         <div id="theme-sort-score" class="theme-sort-btn">Popular</div>
-                        <div id="theme-sort-trending" class="theme-sort-btn">Trending</div>
-                        <div id="theme-sort-liked" class="theme-sort-btn">Liked</div>
                         <div id="theme-sort-new" class="theme-sort-btn">New</div>
                         <div id="theme-sort-old" class="theme-sort-btn">Old</div>
                         <div id="theme-sort-abc" class="theme-sort-btn">ABC</div>
@@ -425,16 +297,6 @@
                 </div>
             </div>
             <div style="position:relative">
-                <div id="opt-in">
-                    <div id="opt-in-box" style="background:#0e0e0e;border-radius:10px;padding:24px;">
-                        <p style="font-size:14px;font-weight:600;">The theme browser has been updated to allow you to like themes, see real-time submissions, and easily submit new themes!</p>
-                        <p style="margin-top:6px;font-size:11px;color:#a4a4a4;font-weight:600">If you choose to use the new browser, an ID will be registered to you in order to save your likes, but your ID is anonymous for your privacy. <a target="_blank" href="https://diditupe.dev/bettercanvas/privacy">More info here</a></p>
-                        <div style="display:flex;margin-top: 14px;gap: 5px;">
-                            <button class="big-button" id="new_browser_in">Use new browser</button>
-                            <button class="big-button" id="new_browser_out">Continue using old</button>
-                        </div>
-                    </div>
-                </div>
                 <div id="premade-themes">
                 </div>
             </div>
@@ -479,10 +341,6 @@
                         <input type="checkbox" id="export-toggles" />
                         <span>On/off toggles</span>
                     </div>
-                    <div class="sub-option">
-                        <input type="checkbox" id="export-gpa" />
-                        <span>GPA settings</span>
-                    </div>
                 </div>
                 <div style="flex: 1">
                     <textarea class="card-input" id="export-output" placeholder="Output"></textarea>
@@ -497,14 +355,6 @@
                     <textarea class="card-input" id="import-input"></textarea>
                 </div>
             </div>
-        </div>
-        <div class="option-container">
-            <div class="theme-header">
-                <h3 class="header-small" style="margin:0;flex:100">Theme browser opt-in reset</h3>
-            </div>
-            <div style="display:flex;gap:12px;">
-                <button id="reset-optin" class="customization-button">Reset opt-in status</button>
-                <p style="color:#a7a7a7">This will bring back the opt-in message so you can select a different option.</p>
             </div>
         </div>
     </div>
@@ -681,21 +531,6 @@
             <div style="display: flex; gap: 10px; align-items: center;">
                 <input type="checkbox" id="card_method_dashboard"></input>
                 <span>Enable alternative card method</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="gpa-bounds-container tab" style="display:none">
-        <div class="tab-header">
-            <h2 style="margin-top: 0" data-i18n="gpa_settings">GPA Calculator Bounds</h2>
-            <button class="big-button back-btn" data-i18n="back">Back</button>
-        </div>
-        <div style="display: flex;gap: 8px;">
-            <div class="gpa-bounds option-container"></div>
-            <div class="gpa-bounds-explanation option-container">
-                The letter grade will be calculated as greater than or equal to the percentage given. <br><br>
-                If your school doesn't use the +/- system, you can enter 101 for those grades to remove them from the
-                calculation. (for example A+ = 101, A = 90, A- = 101)
             </div>
         </div>
     </div>

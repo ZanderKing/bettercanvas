@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "Better Canvas",
-  "description": "Feature packed extension for Canvas.",
+  "name": "Better Canvas Lite",
+  "description": "Debloated personal fork of Better Canvas: no theme-sharing server, no uninstall page, no GPA calculator, notes, tab icons or hover preview.",
   "version": "5.12.6",
   "icons": {
     "16": "icon/icon-16.png",
@@ -15,20 +15,37 @@
       "38": "icon/icon-38.png"
     },
     "default_popup": "html/popup.html",
-    "default_title": "Better Canvas"
+    "default_title": "Better Canvas Lite"
   },
   "background": {
-    "service_worker": "js/background.js"
+    "service_worker": "js/background.js",
+    "scripts": [
+      "js/background.js"
+    ]
   },
   "options_page": "html/options.html",
   "content_scripts": [
     {
-      "matches": ["https://*/*"],
-      "js": ["js/content.js"],
-      "css": ["css/content.css"],
+      "matches": [
+        "https://*/*"
+      ],
+      "js": [
+        "js/content.js"
+      ],
+      "css": [
+        "css/content.css"
+      ],
       "run_at": "document_start"
     }
   ],
-  "permissions": ["storage"],
-  "default_locale": "en"
+  "permissions": [
+    "storage"
+  ],
+  "default_locale": "en",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "better-canvas-lite@local",
+      "strict_min_version": "121.0"
+    }
+  }
 }

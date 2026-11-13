@@ -49,7 +49,7 @@ chrome.runtime.onInstalled.addListener(function () {
             "hide_completed": false,
             "num_todo_items": 4,
             "custom_font": { "link": "", "family": "" },
-            "hover_preview": true,
+            "hover_preview": false,
             "full_width": null,
             "remlogo": null,
             "gpa_calc_bounds": {
@@ -86,15 +86,13 @@ chrome.runtime.onInstalled.addListener(function () {
             "reminder_count": 1,
             "multi_remind": false,
             "id": "",
-            "new_browser": null,
             "gpa_calc_cumulative": false,
             "gpa_calc_weighted": true,
-            "browser_show_likes": false,
             "custom_styles": "",
         }
     };
 
-    const updateMsg = "Better Canvas was just updated!\nThis version added new themes, cumulative GPA into the GPA calculator, and a new sorting function for themes.";
+    const updateMsg = "";
 
     chrome.storage.local.get(null, local => {
         chrome.storage.sync.get(null, async sync => {
@@ -126,4 +124,3 @@ chrome.runtime.onInstalled.addListener(function () {
     });
 });
 
-chrome.runtime.setUninstallURL("https://diditupe.dev/bettercanvas/goodbye");
