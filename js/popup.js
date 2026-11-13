@@ -1279,6 +1279,8 @@ function importTheme(theme) {
                         break;
                 }
             });
+            // themes without their own light palette shouldn't inherit a previous one
+            if (!("dark_preset_light" in theme)) final["dark_preset_light"] = null;
             chrome.storage.sync.set(final);
         });
     } catch (e) {
@@ -1696,7 +1698,8 @@ function refreshColors() {
 function changeCSS(name, color) {
     chrome.storage.sync.get("dark_preset", storage => {
         storage["dark_preset"][name] = color;
-        chrome.storage.sync.set({ "dark_preset": storage["dark_preset"] }).then(() => refreshColors());
+        // manual edits apply to every mode, so drop any auto light palette
+        chrome.storage.sync.set({ "dark_preset": storage["dark_preset"], "dark_preset_light": null }).then(() => refreshColors());
     });
 }
 
@@ -1722,7 +1725,7 @@ function changeToPresetCSS(e, preset = null) {
 }
 
 function applyPreset(preset) {
-    chrome.storage.sync.set({ "dark_preset": preset }).then(() => refreshColors());
+    chrome.storage.sync.set({ "dark_preset": preset, "dark_preset_light": null }).then(() => refreshColors());
 }
 
 /*
