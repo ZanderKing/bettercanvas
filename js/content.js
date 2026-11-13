@@ -198,6 +198,10 @@ function isDomainCanvasPage() {
                 }
             }
 
+            // not a saved Canvas domain: if this page looks like Canvas, add it to the list
+            // (supports more than one school, e.g. two universities' Canvas sites)
+            detectAdditionalCanvas(result.custom_domain);
+
             // if the code reaches this point, its not a canvas page so run the reminders
             setTimeout(reminderWatch, 2000);
             setInterval(reminderWatch, 60000);
@@ -1723,6 +1727,32 @@ function cleanCustomAssignments() {
 
         });
     });
+}
+
+// Canvas pages render <div id="application" class="ic-app">; only pages that match
+// get the API check, so ordinary websites are never sent a request.
+function looksLikeCanvas() {
+    return document.querySelector("#application.ic-app") !== null
+        || document.querySelector('link[href*="instructure"], script[src*="instructure"]') !== null;
+}
+
+function detectAdditionalCanvas(existing) {
+    const run = () => {
+        if (!looksLikeCanvas()) return;
+        getData(`${domain}/api/v1/courses?per_page=1`).then(res => {
+            if (!Array.isArray(res)) return;
+            const host = window.location.hostname;
+            const list = existing.filter(d => d && d !== "");
+            if (list.some(d => domain.includes(d))) return;
+            console.log("Better Canvas - adding another Canvas domain: " + host);
+            chrome.storage.sync.set({ custom_domain: [...list, host] }).then(() => location.reload());
+        }).catch(() => {});
+    };
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", run, { once: true });
+    } else {
+        run();
+    }
 }
 
 function setupCustomURL() {
