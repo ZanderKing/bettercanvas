@@ -7,7 +7,11 @@ Images are bundled in img/classical (see CREDITS.md for sources/licenses).
 */
 
 (() => {
+    // popup UI uses the bundled copies; saved settings use short codes that the
+    // content script resolves to Wikimedia Commons URLs (see resolveThemeImage)
     const img = (name) => chrome.runtime.getURL(`img/classical/${name}.jpg`);
+    const code = (name) => `classical:${name}`;
+    const toLocal = (value) => String(value).replace(/classical:([a-z0-9]+)/g, (m, id) => img(id));
 
     const STATUES = [
         { id: "david", name: "David" },
@@ -64,13 +68,13 @@ Images are bundled in img/classical (see CREDITS.md for sources/licenses).
             case "marble":
                 return {
                     "sidebar": light
-                        ? `linear-gradient(${p.b1}a6, ${p.b1}c2), url("${img("marble3")}") center / cover`
-                        : `linear-gradient(${p.b0}d4, ${p.b0}eb), url("${img("marble3")}") center / cover`,
+                        ? `linear-gradient(${p.b1}a6, ${p.b1}c2), url("${code("marble3")}") center / cover`
+                        : `linear-gradient(${p.b0}d4, ${p.b0}eb), url("${code("marble3")}") center / cover`,
                     "sidebar-text": p.t0,
                 };
             case "statue":
                 return {
-                    "sidebar": `linear-gradient(#0000008f, #000000d1), url("${img(firstStatue)}") center 20% / cover`,
+                    "sidebar": `linear-gradient(#0000008f, #000000d1), url("${code(firstStatue)}") center 20% / cover`,
                     "sidebar-text": "#f5f1ea",
                 };
             case "gradient":
@@ -98,11 +102,14 @@ Images are bundled in img/classical (see CREDITS.md for sources/licenses).
     function stylesFor(fontId, stone) {
         const head = FONTS[fontId].head;
         return [
-            `html body :is(h1,h2,h3,.ic-DashboardCard__header-title),html body :is(h1,h2,h3,.ic-DashboardCard__header-title) :is(span,a){font-family:${head}!important;letter-spacing:.03em}`,
-            `.ic-DashboardCard{border-radius:14px!important;overflow:hidden!important;border:1px solid var(--bcborders)!important;box-shadow:0 1px 2px #0000000d,0 10px 24px -14px #00000059!important;transition:transform .2s ease,box-shadow .2s ease}`,
-            `.ic-DashboardCard:hover{transform:translateY(-2px);box-shadow:0 2px 4px #00000014,0 18px 34px -16px #00000073!important}`,
+            `html body :is(h1,h2,h3,.ic-Dashboard-header__title,.ic-DashboardCard__header-title),html body :is(h1,h2,h3,.ic-Dashboard-header__title,.ic-DashboardCard__header-title) *{font-family:${head}!important;letter-spacing:.02em}`,
+            `.ic-DashboardCard{border-radius:14px!important;overflow:hidden!important;border:1px solid var(--bcborders)!important;box-shadow:0 1px 2px #0000000d,0 8px 20px -14px #0000004d!important;transition:box-shadow .2s ease,border-color .2s ease}`,
+            `.ic-DashboardCard:hover,.ic-DashboardCard:focus-within{border-color:var(--bclinks)!important;box-shadow:0 2px 6px #00000012,0 12px 26px -16px #00000059!important}`,
+            `.ic-DashboardCard__header-button-bg{background:var(--bcbackground-1)!important;opacity:.88!important}`,
+            `.ic-DashboardCard__header-button,.ic-DashboardCard__header-button *{color:var(--bctext-0)!important;fill:var(--bctext-0)!important}`,
+            `.ic-DashboardCard__box__header{background:transparent!important;color:var(--bctext-1)!important;border-bottom:1px solid var(--bcborders)!important}`,
             `.ic-DashboardCard__header_image{background-size:cover!important;background-position:center 25%!important${stone ? ";filter:grayscale(1) contrast(1.05) brightness(1.03)" : ""}}`,
-            `.ic-DashboardCard__header-title,.ic-DashboardCard__header-title span{color:var(--bctext-0)!important;font-size:15px!important}`,
+            `.ic-DashboardCard__header-title,.ic-DashboardCard__header-title span{color:var(--bctext-0)!important;font-size:14px!important}`,
             `.ic-DashboardCard__header-subtitle,.ic-DashboardCard__header-term{color:var(--bctext-2)!important}`,
             `.ic-app-header{box-shadow:inset -1px 0 0 var(--bcborders)!important}`,
             `.ic-app-header__menu-list-item--active .ic-app-header__menu-list-link{background:#8080802e!important}`,
@@ -118,7 +125,7 @@ Images are bundled in img/classical (see CREDITS.md for sources/licenses).
             gradient_cards: false,
             custom_font: { family: "'Inter', sans-serif", link: FONTS[pr.font].link },
             custom_styles: stylesFor(pr.font, pr.stone),
-            images: statues.map(img),
+            images: statues.map(code),
         };
         if (pr.mode === "light") {
             out.dark_preset = presetFor(pr.light, pr.sidebar, first);
@@ -255,13 +262,13 @@ Images are bundled in img/classical (see CREDITS.md for sources/licenses).
             : [[prefs.mode === "light" ? "Light" : "Dark", theme.dark_preset]];
         presets.forEach(([label, p]) => {
             const frame = el("div", { className: "cl-frame", style: `background:${p["background-0"]};border-color:${p["borders"]}` }, box);
-            el("div", { className: "cl-frame-side", style: `background:${p["sidebar"]}` }, frame);
+            el("div", { className: "cl-frame-side", style: `background:${toLocal(p["sidebar"])}` }, frame);
             const main = el("div", { className: "cl-frame-main" }, frame);
             el("div", { className: "cl-frame-title", textContent: "Dashboard", style: `color:${p["text-0"]};font-family:${FONTS[prefs.font].head}` }, main);
             const cards = el("div", { className: "cl-frame-cards" }, main);
             for (let i = 0; i < 3; i++) {
                 const card = el("div", { className: "cl-frame-card", style: `background:${p["background-1"]};border-color:${p["borders"]}` }, cards);
-                el("div", { className: "cl-frame-img", style: `background-image:url("${theme.images[i % theme.images.length]}");${prefs.stone ? "filter:grayscale(1) contrast(1.05)" : ""}` }, card);
+                el("div", { className: "cl-frame-img", style: `background-image:url("${toLocal(theme.images[i % theme.images.length])}");${prefs.stone ? "filter:grayscale(1) contrast(1.05)" : ""}` }, card);
                 el("div", { className: "cl-frame-line", style: `background:${p["text-0"]}` }, card);
                 el("div", { className: "cl-frame-line short", style: `background:${p["links"]}` }, card);
             }

@@ -47,15 +47,5 @@
       "id": "better-canvas-lite@local",
       "strict_min_version": "121.0"
     }
-  },
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "img/classical/*"
-      ],
-      "matches": [
-        "https://*/*"
-      ]
-    }
-  ]
+  }
 }
