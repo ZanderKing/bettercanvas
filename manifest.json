@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Better Canvas Lite",
   "description": "Debloated personal fork of Better Canvas: no theme-sharing server, no uninstall page, no GPA calculator, notes, tab icons or hover preview.",
-  "version": "5.12.6",
+  "version": "5.12.7",
   "icons": {
     "16": "icon/icon-16.png",
     "32": "icon/icon-32.png",
